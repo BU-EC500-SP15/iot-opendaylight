@@ -1,6 +1,6 @@
 #“Multi-Thing” IoT Applications over OpenDaylight Project Outline
 
-####Index!
+####Index
 1. Vision
 2. Properties
   *  Security Needs
