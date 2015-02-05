@@ -1,0 +1,97 @@
+Multi-Thing IoT Applications over OpenDaylight Project Proposal
+
+Vision and Goals of the Project
+This project will aim at providing two smart city mobile applications that will help optimize city operations and reduce expenditure by integrating IoT technology within system to help improve help majority of officials at various stages. The application will also aim at making human life easier in a way by providing reliability aspect to a service with real time sensor data and OpenDaylight Storage. 
+
+(NOTE: An ongoing client need’s survey has limited us to specify the exact task of our application and will be added in the next revision of this proposal)
+
+Users and Personas of the Project
+The primary users range from policy makers to the people it caters for. As a smart city application, it will be targeted towards a particular organisation (academic, government or Non-Profit).  The applcation’s end users may come from the zone of organisations to its users; from city officials to residents.  
+
+Scope and Features of the Project
+
+a.	Inside Project’s Scope
+This project will enable end users to view data collected over sensors in a favorable manner by underlying layer that will enable the architecture. Hence, the project will highly concentrate on Storage aspect of Cloud Computing and will incorporate most layers of IoT Reference model esp. the innermost (Physical Devices and Connectivity) and outermost (Application and Access) layers. Also, in due course the scope may be extended to an added implementation layer for data aggregation.
+                
+	     b.    Out of Scope
+The project will provide clients with an application to view statistical data. It will work highly similar to on a Request/Pull format. i.e. users would be able to pull data out of ODl Server. An interaction or a response-driven action are not incorporated within it and hence are out of this project’s scope.
+
+
+
+
+
+Solution Concept
+The IoT can be divided into layers as shown below:
+ 
+Figure 2 : Different Layers of IoT Reference Model
+
+Our project will aim at mostly all levels of IoT Reference Model from Physical to Application. 
+A normal scenario as to how we map IoT Reference Model in our project can be seen as below.
+
+●	Layer 1:
+Context-aware sensors to enable easy communication and data transfer. Incorporating sensors is targeted towards making unreliable tasks reliable. e.g. an unreliable schedule makes it harder for transit, sensor enables real time data transfer to make it better and reliable and thus making human life easier.
+
+●	Layer 2:
+Data capture and Data Storage, for our model ODl Data Store, needs a communication mechanism to enable sending data to the storage in real time. This is achieved by adding a layer of connectivity. Sensors can be mounted by networking components on top of sensors.
+
+●	Layer 3 & 4:
+Collecting Real Time data collection needs a storage module.  A data storage with computing capabilities enables easy processing and analysis of data, which is done at these layers.
+
+●	Layer 5 & 6:
+The analysed/processed data is then presented in the form of a high level application for users in a way that it is understandable by the end users. An access layer’s implementation can be achieved for data abstraction with ease but not a prerequisite on implementing the other aspects of the model.
+
+The IoT Reference Model integrated with the technologies used within this project looks something like this :
+
+ 
+Figure 2: OpenDaylight Architecture and how it will interact with IoT applications and data input devices
+
+
+
+
+
+
+
+
+
+
+
+Design Implications and Discussion
+
+●	At Physical Layer and Connectivity Layer : This project uses a variety of arduino sensors. A key decision was made to use mobile phones/targeted output devices as input devices so as to integrate both Physical and connectivity layer. Also, this would help in limiting spending on adding networking nodes to sensors and may help provide solution with lower prerequisites.It also uses REST application programming interfaces (APIs) for message passing techniques and supports oneM2M compliant queries.
+
+●	At Data Storage / Element Layer : The project uses ODl - Open Daylight Data Store. DDM is used at the core of this model along with RPC(remote procedure calls) mechanism
+
+●	At Data Abstraction and Application Layer : The model at the higher layer would provide an application mostly in the form of an iOS app written in Objective C keeping in mind the larger scope and target it provides along with the ease of deployment. This would be used to provide Processed Data in a human readable and understandable format.
+
+Acceptance Criteria
+
+The minimum acceptance criteria would be at least two working applications(it may or may not be integrated in one app), using one or more data store to make life easier for the end users or to save them money.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Release Planning
+For Project Proposal :
+*Release planning (Sprint Planning And Schedule Overview)
+a.	Sprint 1/Week 3 : Project Outline,Planning and Researching Technologies to be Used
+b.	Sprint 1/Week 4  : Project Proposal and End-User Survey ; Familiarizing with REST and ODl
+c.	Sprint 2/Week 5 : ‘Calibrating’ Sensors and Working over Data Collection Techniques
+d.	Sprint 2/Week 6 : ODl - Working with ‘Data In’ Phase
+e.	Sprint 3/Week 7 : ODl - Pushing Data In, Working over Mobile App to represent Data-1(Pulling Data Out)
+f.	Sprint 3/Week 8 :  Working over Mobile App to represent Data-2
+g.	Sprint 4/Week  9: Project Demo - Will try to accomplish a successful demo showing the Data without the Compute Aspect over a simple application.
+h.	Sprint 4/Week 10 : Exploring Test Cases
+i.	Sprint 5/Week 11 : Implementing Test Cases
+j.	Sprint 5/Week 12 : Deploying the Application for feedback
+k.	Sprint 6/Week 13 : Analysing Feedback and Enforcing Improvements
+●	An ambitious schedule includes putting the application out for use for a network of public networks in the end stage.
