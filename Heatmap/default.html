@@ -1,0 +1,116 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>
+         Heatmap</title>
+    <link rel="stylesheet" type="text/css" href="style1.css">
+<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=visualization"></script>
+<script type="text/javascript">
+    var jsonarray = '{"lat":"42.352081","long":"-71.106773","lat2":"42.348901","long2":"-72.101880","lat3":"42.349472","long3":"-71.104691","lat4":"42.350804","long4":"-71.108210","lat5":"42.349726","long5":"-71.106472","lat6":"42.350059","long6":"-71.099820","lat7":"42.349313","long7":"-71.110485","lat8":"42.349155","long8":"-71.102567","lat9":"42.351946","long9":"-71.116858","lat10":"42.349472","long10":"-71.095593","lat11":"42.350138","long11":"-71.099069"}';
+    var getLocation = JSON.parse(jsonarray);
+    
+    var mapData = [
+      new google.maps.LatLng(getLocation.lat, getLocation.long),
+      new google.maps.LatLng(getLocation.lat2, getLocation.long2),
+      new google.maps.LatLng(getLocation.lat3, getLocation.long3),
+      new google.maps.LatLng(getLocation.lat4, getLocation.long4),
+      new google.maps.LatLng(getLocation.lat5, getLocation.long5),
+      new google.maps.LatLng(getLocation.lat6, getLocation.long6),
+      new google.maps.LatLng(getLocation.lat7, getLocation.long7),
+      new google.maps.LatLng(getLocation.lat8, getLocation.long8),
+      new google.maps.LatLng(getLocation.lat9, getLocation.long9),
+      new google.maps.LatLng(getLocation.lat10, getLocation.long10),
+      new google.maps.LatLng(getLocation.lat11, getLocation.long11),
+    ];
+    var map, pointarray, heatmap;
+    function initialize() {
+        var photonicsMap;
+        var photonics = new google.maps.LatLng(42.349183, -71.105883);
+        var imageBounds = new google.maps.LatLngBounds(
+              new google.maps.LatLng(42.349343, -71.106559),
+              new google.maps.LatLng(42.348982, -71.105304));
+    var mapOptions = {
+        zoom: 15,
+        center: new google.maps.LatLng(42.349145, -71.105874),
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+    };
+    map = new google.maps.Map(document.getElementById('map-canvas'),
+        mapOptions);
+    photonicsMap = new google.maps.GroundOverlay('http://www.bu.edu/today/files/2014/07/h_iphone-header-shirts.jpg',imageBounds);
+    photonicsMap.setMap(map);
+    google.maps.event.addListener(map, 'zoom_changed', function () {
+        zoomLevel = map.getZoom();
+        if (zoomLevel >= 21) {
+            window.location.href='/IndoorLocalisationAtZoomIn.html';
+        }
+    });
+    var pointArray = new google.maps.MVCArray(mapData);
+//
+    //var marker, i;
+
+//    for (i = 0; i < getLocations.length; i++) {  
+  //      marker = new google.maps.Marker({
+    //        position: new google.maps.LatLng(getLocations.lat[i], locations[i]),
+      //      map: map
+        //});
+        //
+    var marker = new google.maps.Marker({
+        position: new google.maps.LatLng(getLocation.lat6, getLocation.long6),
+        map: map,
+        title: 'W\'s iPhone'
+    });
+    var marker2 = new google.maps.Marker({
+        position: new google.maps.LatLng(getLocation.lat10, getLocation.long10),
+        map: map,
+        title: 'Z\'s iPad'
+    });
+    var marker3 = new google.maps.Marker({
+        position: new google.maps.LatLng(getLocation.lat11, getLocation.long11),
+        map: map,
+        title: 'X\'s iPad'
+    });
+    var marker4 = new google.maps.Marker({
+        position: new google.maps.LatLng(getLocation.lat9, getLocation.long9),
+        map: map,
+        title: 'Y\'s iPad'
+    });
+    var HistoryX = [
+        new google.maps.LatLng(getLocation.lat10, getLocation.long10),
+        new google.maps.LatLng(getLocation.lat11, getLocation.long11),
+        new google.maps.LatLng(getLocation.lat9, getLocation.long9)
+    ];
+
+    var Trail = new google.maps.Polyline({
+        path: HistoryX,
+        strokeColor: '#FFFFFF',
+        strokeOpacity: 1.0,
+        strokeWeight: 8
+    });
+    heatmap = new google.maps.visualization.HeatmapLayer({
+        data: pointArray
+    });
+    heatmap.setMap(map);
+}
+    
+function toggleHeatmap() {
+    heatmap.setMap(heatmap.getMap() ? null : map);
+}
+
+function changeRadius() {
+    heatmap.set('radius', heatmap.get('radius') ? null : 20);
+}
+
+google.maps.event.addDomListener(window, 'load', initialize);
+
+</script>
+</head>
+<body>
+<div id="panel">
+  <button onclick="toggleHeatmap()">ON/OFF</button>
+  <button onclick="changeRadius()">Expand/Shrink</button>
+</div>
+<div id="map-canvas"></div>
+</body>
+</html>
