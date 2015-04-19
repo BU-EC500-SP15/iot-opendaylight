@@ -1,0 +1,53 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.1.0'
+    }
+}
+apply plugin: 'com.android.application'
+
+
+android {
+    compileSdkVersion 22
+    buildToolsVersion "21.1.2"
+
+    defaultConfig {
+        applicationId "seanliu93.compass_android"
+        minSdkVersion 15
+        targetSdkVersion 22
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: 'bolts-android-1.1.4.jar')
+    compile fileTree(dir: 'libs', include: 'Parse-1.9.0.jar')
+    compile fileTree(dir: 'libs', include: 'gson-2.2.4.jar')
+
+    // Module dependency on ParseLoginUI library sources
+    compile project(':ParseLoginUI')
+
+// If your app's project does not have the Parse Android SDK already, copy it into your
+// project at YOUR_PROJECT_LIBS_PATH.
+    compile files('libs/Parse-1.8.4.jar')
+    compile files('libs/ParseFacebookUtils-1.8.4.jar')
+
+// Uncomment if using Facebook Login (optional Maven dependency)
+// compile 'com.facebook.android:facebook-android-sdk:3.23.1'
+    dependencies {
+        compile 'com.github.asne.facebook:facebook:3.17.2'
+    }
+    compile 'com.google.android.gms:play-services:6.5.87'
+    compile 'com.android.support:appcompat-v7:22.0.0'
+}
+
+

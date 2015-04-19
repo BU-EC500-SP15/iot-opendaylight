@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Compass_Android</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_maps">MapsActivity</string>
+
+    <string name="parse_app_id">iUnxt4PGyVzd1UxV9mRWZ2uy5WXGPszhyb9yTEPw</string>
+    <string name="parse_client_key">wM56bYMXCldLJUuDVR4IBedymJN1XUGCr0LwVO3s</string>
+    <string name="facebook_app_id">YOUR_FACEBOOK_APP_ID</string>
+    <string name="twitter_consumer_key">YOUR_TWITTER_CONSUMER_KEY</string>
+    <string name="twitter_consumer_secret">YOUR_TWITTER_CONSUMER_SECRET</string>
+
+    <string name="profile_logo_content_description">Logo</string>
+    <string name="profile_title_logged_in">Your are logged in as</string>
+    <string name="profile_logout_button_label">Log out</string>
+</resources>
