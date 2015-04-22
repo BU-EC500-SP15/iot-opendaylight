@@ -2,34 +2,34 @@
 NodeJS scripts and attached views for Browser HeatMap.
 
 ##Requirements:
-Almost all required modules are added already to the folder.
-But, in case of missing node_module, one can type(without quotes):
-	"npm install missing_module_name"
+*Almost all required modules are added already to the folder.
+*But, in case of missing node_module, one can type(without quotes):
+	*"npm install missing_module_name"
 to install the required modules.
 
-Modules Used:
-HTTP, REQUEST : for forming HTTP GET,POST requests to get data on/off the ODL DataStore
-SOCKET.IO     : for communication between server and view pages
+*Modules Used:
+**HTTP, REQUEST : for forming HTTP GET,POST requests to get data on/off the ODL DataStore
+**SOCKET.IO     : for communication between server and view pages
 
 ##TO RUN the script:
-You will need NodeJS(0.12.0 or later) to run this script
+*You will need NodeJS(0.12.0 or later) to run this script
 
-To check if you already have NodeJS installed, type in(without quotes):
-		"node -v" 
-It will return the version of your NodeJS, in case you don't have it installed:
+*To check if you *already have NodeJS installed, type in(without quotes):
+		*"node -v" 
+*It will return the version of your NodeJS, in case you don't have it installed:
 One can download it following the steps below:
 
 	Linux Users  : sudo apt-get install node
 	MAC Users    : yum apt-get install node
 	Windows Users: Download from - https://nodejs.org/download/
 
-Type in this into your terminal(after the above installation completes)
+*Type in this into your terminal(after the above installation completes)
 cd HEATMAP
-node heatmap.js
+		*node heatmap.js
 
-The console will tell you the port it is listening to(currently 8111)
+*The console will tell you the port it is listening to(currently 8111)
 With heatmap.js running in background,
-Type in: 
+*Type in: 
 	http://localhost:8111 in your Browser 
 
 and voila! It works!
