@@ -1,0 +1,395 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Indoor Localisation</title>
+<!--
+
+    Stylesheet imported from : ...
+
+--> <!--<link rel="stylesheet" type="text/css" href="C:\\Users\user\Desktop\HEATMAP\style1.css"/>-->
+      <style>@import url(http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css);
+@import url(http://fonts.googleapis.com/css?family=Titillium+Web:300);
+html, body, #map-canvas {
+    height: 88%;
+    margin: 10px 0px 0px 0px;
+    padding: 0px;
+    width: 1031px;
+}
+
+#panel {
+    position: absolute;
+    top: 16px;
+    left: 77%;
+          margin-left: -180px;
+          z-index: 5;
+          background-color: #fff;
+          padding: 5px;
+          border: 1px solid #999;
+}
+
+.fa-2x {
+font-size: 2em;
+}
+
+.fa {
+position: relative;
+display: table-cell;
+width: 60px;
+height: 36px;
+text-align: center;
+vertical-align: middle;
+font-size:20px;
+    top: 0px;
+    left: -39797px;
+}
+
+.main-menu:hover,nav.main-menu.expanded {
+width:250px;
+overflow:visible;
+}
+
+.main-menu {
+background:#fbfbfb;
+border-right:1px solid #e5e5e5;
+position:absolute;
+top:0;
+bottom:170px;
+height:108%;
+left:0;
+width:55px;
+overflow:hidden;
+-webkit-transition:width .05s linear;
+transition:width .05s linear;
+-webkit-transform:translateZ(0) scale(1,1);
+z-index:1000;
+            margin-left: 0px;
+        }
+
+.main-menu>ul {
+margin:7px 0;
+}
+
+.main-menu li {
+position:relative;
+display:block;
+width:250px;
+}
+
+.main-menu li>a {
+position:relative;
+display:table;
+border-collapse:collapse;
+border-spacing:0;
+color:#999;
+ font-family: arial;
+font-size: 14px;
+text-decoration:none;
+-webkit-transform:translateZ(0) scale(1,1);
+-webkit-transition:all .1s linear;
+transition:all .1s linear;
+  
+}
+
+.main-menu .nav-icon {
+position:relative;
+display:table-cell;
+width:60px;
+height:36px;
+text-align:center;
+vertical-align:middle;
+font-size:18px;
+}
+
+.main-menu .nav-text {
+position:relative;
+display:table-cell;
+vertical-align:middle;
+width:190px;
+  font-family: 'Titillium Web', sans-serif;
+}
+
+.main-menu>ul.back{
+position:absolute;
+left:0;
+bottom:0;
+}
+
+.no-touch .scrollable.hover {
+overflow-y:hidden;
+}
+
+.no-touch .scrollable.hover:hover {
+overflow-y:auto;
+overflow:visible;
+}
+
+a:hover,a:focus {
+text-decoration:none;
+}
+
+nav {
+    position:fixed;
+-webkit-user-select:none;
+-moz-user-select:none;
+-ms-user-select:none;
+-o-user-select:none;
+user-select:none;
+}
+
+nav ul,nav li {
+outline:0;
+margin:0;
+padding:0;
+}
+.main-menu li:hover>a,nav.main-menu li.active>a,.dropdown-menu>li>a:hover,.dropdown-menu>li>a:focus,.dropdown-menu>.active>a,.dropdown-menu>.active>a:hover,.dropdown-menu>.active>a:focus,.no-touch .dashboard-page nav.dashboard-menu ul li:hover a,.dashboard-page nav.dashboard-menu ul li.active a {
+color:#fff;
+background-color:#5fa2db;
+}
+.area {
+float: left;
+background: #e2e2e2;
+width: 100%;
+height: 100%;
+}
+@font-face {
+  font-family: 'Titillium Web';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Titillium WebLight'), local('TitilliumWeb-Light'), url(http://themes.googleusercontent.com/static/fonts/titilliumweb/v2/anMUvcNT0H1YN4FII8wpr24bNCNEoFTpS2BTjF6FB5E.woff) format('woff');
+}
+.infoPane {
+  height: 483px;
+  position:relative;
+  margin-left: 1039px;
+
+}
+
+.searchb input {
+            border-style: none;
+            border-color: inherit;
+            border-width: 0px;
+            background-color: #f5f5f5;
+            font-size: 14px;
+            margin-top: 10px;
+            color: #999;
+            letter-spacing: 1px;
+            padding: 4px 8px;
+            font-family: calibri, helvetica, arial;
+            width: 306px;
+            height: 27px;
+            margin-left: 160px;
+    margin-bottom: 0px;
+}
+.map{
+    display:flexbox;
+}
+.mapdiv{
+
+    height:114px;
+    width:114px;
+    float:left;
+    align-content:center;
+    align-items:center;
+    text-align:center;
+    display: table-cell;
+    vertical-align:middle;
+
+
+}</style>
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+<!--Edit PORT# to what your server is listening at-->
+<script src='//localhost:8119/socket.io/socket.io.js'></script>
+
+<!--
+    SOCKET for COMMUNICATION between view pages and back end NodeJS Server
+-->
+
+<script>
+            var PORT = 8119;  //Same as PORT# in heatmap.js
+            var socket = io.connect('//localhost:' + PORT);
+
+            socket.on('welcome', function (data) {
+                
+                $('#messages').append('<li>' + data.message + '</li>');
+                socket.emit('client', { data: 'Page Refreshed' });
+
+            });
+    
+            socket.on('allDevices',function(data){
+                for (var key in allDevices) {
+                    $('#messages').append('<li>'+'\n'+(allDevices[key])+'</li>');
+                }
+                socket.emit('handshake',{ data:'Operation successfull'});
+                $('#messages').append('<li>' + data.message + '</li>');
+
+            });
+            socket.on('update', function (data) {
+                console.log(data);
+                $('#messages').append('<li>' + data.time +' \n' + data.msg+ '\n  New Device Update Recieved! ' + '</li>');
+            });
+            /*
+             socket.on('rssi', function (data) {
+                
+                $('#messages').append('<li>' + data.time + '\n  New Device Update! ' + '</li>');
+                $('#mapgrid1').append('<li><i class="fa fa-mobile-phone fa-2x"></i><span class="nav-text"><li>' + '' + '</span></li>');
+
+                for(i=0;i<data.rssival.length;i++){
+                    
+                    //RSSI->Distance
+                    //if it is in 1
+                    //calculate only if it is in beacons range
+                    if (x1 < -2 && x1 > -1) {
+
+                    }
+                    $('#mapgrid1').append('<li>' + data.rssival + '</li>');
+                    //if it is in 2
+                    //$('#mapgrid1').append('<li>' + data.rssival + d[i] + '</li>');
+                    //and so on
+                }
+            });
+            /*
+            function rssiTODistance(rssiv) {
+                var dist = 0,n=4.2119;
+                if (rssiv == 0) {
+                    return -1.0; 
+                }
+                n = 4;
+                dist = 10^(A/(10*n)-rssiv/(10*n));
+                var e = rssiv*1.0/txP;
+                if (e < 1.0) {
+                    dist= Math.pow(e,10);
+                }
+                else {
+                    dist =  (0.89976)*Math.pow(e,7.7095) + 0.111;    
+                }
+                return dist;
+            }
+            */
+            socket.on('error', function () { console.error(arguments) });
+
+   function showLocationHistory() {
+       //append instead
+        infoPane.textContent = "Location  \n history \n A-> \n B-> \n C-> \n D";
+    }
+
+    function showDeviceInformation() {
+        //append instead
+        ///add device information
+        infoPane.textContent = "Device Information:\t\t\t" + "\t" + "Device type iPhone" + "\t" + "Current Location:\t23`,46`";
+
+    }
+
+    function showSearchResults() {
+       
+        infoPane.textContent = "Device A \t Device B";
+    }
+</script>
+
+</head>
+ <body class="imgdiv" style="height: 618px; width: 1268px">
+
+<!--SEARCH BOX-->
+
+    <form action="#" class="searchb">  
+      <input type="text" name="q" placeholder="Looking For Someone?.." id="sf"/>
+         <a href="#" style="text-underline-position:auto" onclick="showSearchResults();">
+            <i class="fa fa-search fa-2x"></i>
+         </a>
+</form>
+
+<!--NAVIGATION PANEL ON THE LEFT-->
+
+    <div class="map" id="map" style="background-image: url('pho111.jpg');height: 570px; width: 570px; margin-left: 58px;">
+        <!-- CREATE AUTO GRID ON DIMENSIONS-->
+        <div id="mapgrid1" class="mapdiv"></div>
+        <div id="mapgrid2" class="mapdiv"></div>
+        <div id="mapgrid3" class="mapdiv"></div>
+        <div id="mapgrid4" class="mapdiv"></div>
+        <div id="mapgrid5" class="mapdiv"></div>
+        <div id="mapgrid6" class="mapdiv"></div>
+        <div id="mapgrid7" class="mapdiv"></div>
+        <div id="mapgrid8" class="mapdiv"></div>
+        <div id="mapgrid9" class="mapdiv"></div>
+        <div id="mapgrid10" class="mapdiv"></div>
+        <div id="mapgrid11" class="mapdiv"></div>
+        <div id="mapgrid12" class="mapdiv"></div>
+        <div id="mapgrid13" class="mapdiv"></div>
+        <div id="mapgrid14" class="mapdiv"></div>
+        <div id="mapgrid15" class="mapdiv"></div>
+        <div id="mapgrid16" class="mapdiv"></div>
+        <div id="mapgrid17" class="mapdiv"></div>
+        <div id="mapgrid18" class="mapdiv"></div>
+        <div id="mapgrid19" class="mapdiv"></div>
+        <div id="mapgrid20" class="mapdiv"></div>
+        <div id="mapgrid21" class="mapdiv"></div>
+        <div id="mapgrid22" class="mapdiv"></div>
+        <div id="mapgrid23" class="mapdiv"></div>
+        <div id="mapgrid24" class="mapdiv"></div>
+        <div id="mapgrid25" class="mapdiv"></div>        
+    </div>
+   
+    <nav class="main-menu">
+            <ul>
+                <li>
+                    <a href="#" onclick="showDeviceInformation();">
+                        <i class="fa fa-mobile-phone fa-2x"></i>
+                        <span class="nav-text">
+                            Device Information
+                        </span>
+                    </a>
+                  
+                </li>
+                <li class="has-subnav">
+                    <a href="#" onclick="showLocationHistory();">
+                        <i class="fa fa-location-arrow fa-2x"></i>
+                        <span class="nav-text">
+                            Location History
+                        </span>
+                    </a>
+                    
+                </li></ul>
+            <ul class="back">
+                <li>
+                   <a href="outdoorMap.html">
+                        <i class="fa fa-map-marker fa-2x"></i>
+                        <span class="nav-text">
+                        Back to Maps?
+                        </span>
+                    </a>
+                </li>  
+            </ul>
+        </nav>
+
+<!--MAP GRID-->
+
+<!--INFORMATION PANE ON THE RIGHT-->
+
+    <div id='infoPane' class='infoPane' style="margin-top: 0px; z-index: 999; top: -563px; left: 46px; width: 270px; background-color: #FFFFFF; overflow-y: scroll;">
+       &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;    This is Information Pane!
+        <ul id='messages'></ul>
+       
+        <ul>
+                <li>
+                       <i class="fa fa-mobile-phone fa-2x"></i>
+                        <span class="nav-text">
+                            Device A
+                        </span>
+                  </li>
+                <li class="has-subnav">
+                    <i class="fa fa-mobile-phone fa-2x"></i>
+                        <span class="nav-text">
+                            Device B
+                        </span>
+                </li></ul>
+            <ul class="back">
+                <li>
+                        <i class="fa fa-mobile-phone fa-2x"></i>
+                        <span class="nav-text">
+                            Device C
+                         </span>
+                </li>  
+            </ul>
+    </div>
+
+</body>
+</html>

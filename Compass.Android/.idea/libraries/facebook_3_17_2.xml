@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="facebook-3.17.2">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/ParseLoginUI/build/intermediates/exploded-aar/com.github.asne.facebook/facebook/3.17.2/classes.jar!/" />
+      <root url="file://$PROJECT_DIR$/ParseLoginUI/build/intermediates/exploded-aar/com.github.asne.facebook/facebook/3.17.2/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
