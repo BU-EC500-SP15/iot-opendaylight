@@ -399,11 +399,12 @@ google.maps.event.addDomListener(window, 'load', initialize);
 <body class="bdy">
     
 <form action="#" class="searchb">  
-       <input type="text" name="q" placeholder="Looking For Someone?.." id="sf"/>
-         <a href="#" style="text-underline-position:auto" onclick="showSearchResults();">
-            <i class="fa fa-search fa-2x"></i>
+       <input type="text" name="q" placeholder="Looking For Someone?" id="sf"/>
+         <a href="#" style="text-underline-position:auto;" onclick="showSearchResults();">
+            <i class="fa fa-search" style = "position: relative; display: inline-block; left: -10px; top: 6px;"></i>
          </a>
 </form>
+
     <nav class="main-menu">
             <ul>
                 <li>
@@ -436,7 +437,7 @@ google.maps.event.addDomListener(window, 'load', initialize);
             </ul>
         </nav>
 
-<div id="map-container" style="height: 530px; width: 968px; margin-left: 68px; margin-top: 10px;">
+<div id="map-container" style="height: 565px; width: 968px; margin-left: 68px; margin-top: 10px;">
 <div id="panel">
   <button onclick="toggleHeatmap()">ON/OFF</button>
   <button onclick="changeRadius()">Expand/Shrink</button>
@@ -444,13 +445,13 @@ google.maps.event.addDomListener(window, 'load', initialize);
 <div id="map-canvas">
 </div>
 
-    <div id='infoPane' class='infoPane' style="align: center; width: 18.5% ;right: 0; top: 0; height: 100%; overflow-y: auto;">
-       <h2 align = "center"> Information Pane </h2>
+    <div id='infoPane' class='infoPane' style="width: 18.5% ;right: 0; top: 0; height: 100%; overflow-y: auto;">
+       <h2 align = "center"><u> Information Pane </u> </h2>
         <ul id='messages'></ul>
-                       
+                       <center>
 					   <i class="fa fa-mobile-phone fa-2x"></i>
                         <span class="nav-text">
-                            Device A
+                             Device A 
                         </span>
 				 <hr/>
                     <i class="fa fa-mobile-phone fa-2x"></i>
@@ -462,7 +463,19 @@ google.maps.event.addDomListener(window, 'load', initialize);
                         <span class="nav-text">
                             Device C
                          </span>
-			
+						 
+				<hr/>
+                        <i class="fa fa-mobile-phone fa-2x"></i>
+                        <span class="nav-text">
+                            Device D
+                         </span>
+						 
+				<hr/>
+                        <i class="fa fa-mobile-phone"></i>
+                        <span class="nav-text">
+                            Device E
+                         </span>
+						</center>
     </div>
 
 </div>
