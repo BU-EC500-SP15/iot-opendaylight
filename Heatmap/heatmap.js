@@ -20,19 +20,8 @@ var http    =   require('http').Server(app);
 var io      =   require('socket.io')(http);
 
 var PORT = 8119;         //nodejs listens @ PORT#
-/*
-//construtor for devices
 
-function deviceConstructor(UUID, accFlag, x, y) {
-    this.dev_UUID = UUID;
-    this.dev_accFlag = accFlag;
-    this.dev_x = x;
-    this.dev_y = y;
-}
-//var dev_UUID, dev_accFlag, dev_x, dev_y;
-*/
-
-//devices array of objects has each object as : {device_UUID,acc_flag,x,y}
+//devices array of objects has each object as : {device_UUID,acc_flag,x,y,creationTime,IN/OUT}
 //each object is an array in itself
 //e.g. devices[0] may return [UUID , 100, 42.1111111, -67.2222222]
 //x : latitude  (in case of CMX,GPS) and co-ordinate(in case of iBeacons)
@@ -45,6 +34,8 @@ var devicesiB   = [];       //Devices under iBeacons Monitoring
 var devicesCMX  = [];       //Devices under CMX Monitoring
 var devicesGPS  = [];       //Devices under GPS Monitoring
 var devicePaths = [];       //Devices paths for initial GET
+var isUpdate;
+updated = [];              //keeps track of updates/notifications on location change or device addition
 
 var IP = "52.10.62.166"; //karaf is running @ ip#
 var karafPORT = "8282";  //karaf listens @ karafPORT#  
@@ -86,53 +77,61 @@ request({
     Authorization: "Basic YWRtaW46YWRtaW4="
 }, function (error, response, data) {
 
-    //if(data.length){
     console.log("GEETING DATA FROM:-" + GetAllUrl);
-    console.log(JSON.stringify(data));
+   
+    if (data) {
 
-    //atttribute 10 contains all the device paths
-    devicePaths = JSON.stringify(data.output.ResourceOutput[0].Attributes[8]["attributeValue"]);
-    console.log(devicePaths);
+        //debug: remove HERE
+        console.log(JSON.stringify(data));
 
-    //removing quotes from attributeValue
-    var withoutQuotes = devicePaths.substring(1, devicePaths.length - 2);
+  
+        //atttribute 10 contains all the device paths
+        devicePaths = JSON.stringify(data.output.ResourceOutput[0].Attributes[8]["attributeValue"]);
+        console.log(devicePaths);
 
-    //splitting each path by comma
-    devicePaths = withoutQuotes.split(",");
-    
+        //removing quotes from attributeValue
+        var withoutQuotes = devicePaths.substring(1, devicePaths.length - 2);
 
-    for (i = 0; i < devicePaths.length; i++) {
+        //splitting each path by comma
+        devicePaths = withoutQuotes.split(",");
 
-        //removing the array brackets & spaces(first characters)
-        devicePaths[i] = devicePaths[i].substring(1);
 
-        console.log("\n URL GRABBED for Device " + i + " : " + devicePaths[i]);
+        for (i = 0; i < devicePaths.length; i++) {
 
-        var relPath = devicePaths[i];
-        console.log(relPath);
-        var eachPath = "http://" + IP + ":" + karafPORT + "/" + relPath + "/AccuracyFlag" + urlParameters;
-        requestAccFlag(relPath, eachPath);
-        for (var key in devices) {
-            console.log("HERE"+devices[key]);
+            //removing the array brackets & spaces(first characters)
+            devicePaths[i] = devicePaths[i].substring(1);
+
+            console.log("\n URL GRABBED for Device " + i + " : " + devicePaths[i]);
+
+            var relPath = devicePaths[i];
+            console.log(relPath);
+            var eachPath = "http://" + IP + ":" + karafPORT + "/" + relPath + "/AccuracyFlag" + urlParameters;
+            requestAccFlag(relPath, eachPath,0);
+            for (var key in devices) {
+                console.log("HERE" + devices[key]);
+            }
+           
+            /*
+                Now for each path/device grabbed, we loop through each path and issue HTTP GET requests to grab and check Accuracy
+                flag and then gather required data by another GET request at appropriate URL {UUId,Name,X,Y}
+            */
+            //}
         }
-        sendDevices(devices);
-
-        /*
-            Now for each path/device grabbed, we loop through each path and issue HTTP GET requests to grab and check Accuracy
-            flag and then gather required data by another GET request at appropriate URL {UUId,Name,X,Y}
-        */
-    //}
+    }
+    else {
+        console.log("Error connecting to server : " + JSON.stringify(response));
     }
     //raw for each device check accuracy flag and put it in deviceib device cmx etc
 });
 
 /*
+
 Function requestAccFlag
 Input Parameters : path to get the flag from
 This function checks the Accuracy Flag on device and invokes requestLocationData function on it to get the location Data
 
 */
-function requestAccFlag(relPath,eachPath) {
+function requestAccFlag(relPath,eachPath, isUpdated) {
     request({
         url: eachPath,
         json: true,
@@ -150,38 +149,39 @@ function requestAccFlag(relPath,eachPath) {
             1xx GPS
         */
         //if iBeacon is set, requestLocation is called with param 0 for LocBeacon
-        if (accFlag[3] == '1') {
+        if (accFlag[1] == '1') {
 
             //look for Location under ../../UUID/LocBeacon container : 1
             console.log("1");
-            requestLocation(1, relPath);
+            requestLocation(1, relPath, isUpdated);
         }
 
             //if iBeacon is not set/recieving look under LocCMX
-        else if (accFlag[3] != '1') {
+        else if (accFlag[1] != '1') {
 
             if (accFlag[2] == '1') {
 
                 //look for Location under ../../UUID/LocCMX container : 2
                 console.log("2");
-                requestLocation(2, relPath);
+                requestLocation(2, relPath, isUpdated);
             }
 
                 //if neither iBeacon nor CMX is recieving location
             else if (accFlag[2] != '1') {
 
                 //look for Location under ../../UUID/LocGPS container : 3
-                if (accFlag[1] == '1') {
+                if (accFlag[3] == '1') {
 
                     console.log("3");
-                    requestLocation(3, relPath);
+                    requestLocation(3, relPath, isUpdated);
 
                 }
 
                     //if none is recieving updates on location
-                else if (accFlag[1] != '1') {
+                else if (accFlag[3] != '1') {
 
                     //change x,y to 0,0 : Error Code
+                    
                     console.log("4");
                     dev_x = 0;
                     dev_y = 0;
@@ -195,12 +195,13 @@ function requestAccFlag(relPath,eachPath) {
      })
 }
 
-/*function Location data:
+/*
+function Location data:
 input parameters : Identifier(0: LocBeacon, 1:LocCMX, 2:LocGPS) and Device Path
 returns          : locData
 function LocatinoData when called returns device UUID,X,Y,TimeStamp by issuing a GET
 */
-function requestLocation(LocId, treePath) {
+function requestLocation(LocId, treePath, isUpdated) {
   
     console.log(LocId, treePath);
     //if location data is under LocBeacon
@@ -235,9 +236,23 @@ function requestLocation(LocId, treePath) {
             //grabbing timestamp of updated location/content creation Time
             var last_updated = JSON.stringify(data.output.ResourceOutput[0].Attributes[4]["attributeValue"]);;
             console.log("\n RAW DATA: \n" + JSON.stringify(data));
+            //devices.push([dev_UUID, dev_x, dev_y, last_updated, "INOUT"]);
 
-            devices.push([dev_UUID, dev_x, dev_y, last_updated]);
-            sendDevices(devices);
+            if (isUpdated != 2) {
+                devices.push([dev_UUID, dev_x, dev_y, last_updated, "INOUT"]);
+            }
+            else if (isUpdated == 2) {
+                for (var key in devices) {
+
+                    //if UUID match is found, add to the array of locations
+                    if (devices[key][0] == dev_UUID) {
+                        updated[key][1].push(dev_x);
+                        updated[key][2].push(dev_y);
+                        updated[key][3].push(last_updated);
+                        updated[key][4].push("INOUT");
+                    }
+                }
+            }
         })
     }
     else if (LocId == 2) {
@@ -272,8 +287,21 @@ function requestLocation(LocId, treePath) {
             var last_updated = JSON.stringify(data.output.ResourceOutput[0].Attributes[4]["attributeValue"]);;
             console.log("\n RAW DATA: \n" + JSON.stringify(data));
 
-            devices.push([dev_UUID, dev_x, dev_y, last_updated]);
-            sendDevices(devices);
+            if (isUpdated != 2) {
+                devices.push([dev_UUID, dev_x, dev_y, last_updated, "INOUT"]);
+            }
+            else if (isUpdated == 2) {
+                for (var key in devices) {
+
+                    //if UUID match is found, add to the array of locations
+                    if (devices[key][0] == dev_UUID) {
+                        updated[key][1].push(dev_x);
+                        updated[key][2].push(dev_y);
+                        updated[key][3].push(last_updated);
+                        updated[key][4].push("INOUT");
+                    }
+                }
+            }
         })
     }
 
@@ -289,7 +317,7 @@ function requestLocation(LocId, treePath) {
         }, function (error, response, data) {
 
             //grabbing device's UUID
-            var attr1 = JSON.stringify(data.output.ResourceOutput[0].Attributes[6]["attributeValue"]);
+            var attr1 = JSON.stringify(data.output.ResourceOutput[0].Attributes[5]["attributeValue"]);
             attr1 = attr1.split("/");
             var dev_UUID = attr1[3];
 
@@ -297,7 +325,7 @@ function requestLocation(LocId, treePath) {
 
             //grabbing device's X Co-ordinate/Latitude
             var dev_x;
-            var attr2 = JSON.stringify(data.output.ResourceOutput[0].Attributes[5]["attributeValue"]);
+            var attr2 = JSON.stringify(data.output.ResourceOutput[0].Attributes[7]["attributeValue"]);
             attr2 = attr2.substring(1, attr2.length - 1);
             attr2 = attr2.split(",");
 
@@ -311,40 +339,122 @@ function requestLocation(LocId, treePath) {
             var last_updated = JSON.stringify(data.output.ResourceOutput[0].Attributes[4]["attributeValue"]);;
             console.log("\n RAW DATA: \n" + JSON.stringify(data));
 
-            devices.push([dev_UUID, dev_x, dev_y, last_updated]);
-            sendDevices(devices);
-            //console.log("Device Pushed!!" + dev_UUID + i + dev_x + dev_y);
+            //devices.push([dev_UUID, dev_x, dev_y, last_updated,"OUT"]);
+            if (isUpdated != 2) {
+                devices.push([dev_UUID, dev_x, dev_y, last_updated, "OUT"]);
+            }
+            else if (isUpdated == 2) {
+                for (var key in devices) {
+
+                    //if UUID match is found, add to the array of locations
+                    if (devices[key][0] == dev_UUID) {
+                        updated[key][1].push(dev_x);
+                        updated[key][2].push(dev_y);
+                        updated[key][3].push(last_updated);
+                        updated[key][4].push("OUT");
+                    }
+                }
+            }
         })
-        //devices.push([dev_UUID, dev_x, dev_y, last_updated]);
         
-   
     }
-   
+
+    //If device has left/logged out already
+    else if (LocId = 4) {
+        request({
+
+            async: false,
+            url: "http://" + IP + ":" + karafPORT + "/" + treePath + '/LocGPS/latest' + urlParameters + '&resultContent=6',
+            json: true,
+            Authorization: "Basic YWRtaW46YWRtaW4="
+
+        }, function (error, response, data) {
+
+            //grabbing device's UUID
+            var attr1 = JSON.stringify(data.output.ResourceOutput[0].Attributes[7]["attributeValue"]);
+            attr1 = attr1.split("/");
+            var dev_UUID = attr1[3];
+
+            console.log("\n DEVICE LEFT!---" + dev_UUID);
+
+            //check devices array for matching UUID
+            for (var key in devices) {
+
+                //if UUID match is found
+                if (devices[key][0] == dev_UUID) {
+
+                    //splice the array starting from the current index for/uptil 1 element
+                    devices.splice(key, 1);
+                    updated.splice(key, 1);
+                }
+            }
+            console.log("\n RAW DATA: \n" + JSON.stringify(data));
+
+        })
+    }
 }
-/*
-        sendDevices()
-       Sending device Array to view page/s accordingly via socket
-*/
-function sendDevices(devices) {
-    io.sockets.emit('allDevices', { allDevices: devices });
-}
 
-
-
-/*
 function sendUpdate() {
-    io.sockets.emit('time', { time: new Date().toJSON() });
-    io.sockets.emit('msg', { msg:'\n -------Device Added with Name : ' + dev + '\n With Latitude' + dev3 + '\n and Longitudee' + dev4 });
-}*/
+   // io.sockets.emit('updatedDev', {updatedDev:updated});
+}
+
+results = [];
 
 io.sockets.on('connection', function (socket) {
     socket.on('client', console.log);
+    //debug uncomment HERE
+    query = '';
     socket.emit('welcome', { message: '\n Connection Established with the Server!' });
-    sendDevices(devices);
-    socket.emit('allDevices', { allDevices: devices });
-    socket.on('handshake',console.log);
+    //uncomment HERE SUNDAY
+    socket.emit('allDevices', { devices: devices });
+
+ //   sendUpdate();
+    socket.on('search', function (data) {
+
+        query = data.query;
+        console.log("searching");
+        var queryUrl = "http://" + IP + ":" + karafPORT + "/InCSE1/UserAE/" + data.query + urlParameters + "&resultContent=6";
+
+        request({
+            url: queryUrl,
+            json: true,
+            async:false,
+            Authorization: "Basic YWRtaW46YWRtaW4="
+        }, function (error, response, data) {
+
+            console.log("GEETING DATA FROM:-" + queryUrl);
+
+            if (data) {
+
+                //debug: remove HERE
+                console.log(JSON.stringify(data));
+
+                //atttribute 0 contains all child container in this case device UUID which we need
+                queryPath = JSON.stringify(data.output.ResourceOutput[0].Attributes[0]["attributeValue"]);
+                console.log(queryPath);
+
+                //removing quotes from attributeValue
+                var withoutQuotes = queryPath.substring(1, queryPath.length - 2);
+
+                //splitting each path by comma then splitting by '/'
+                queryPath = withoutQuotes.split(",");
+                queryPath = withoutQuotes.split("/");
+                
+                console.log("\n URL UUID for : " + queryPath[3]);
+                io.sockets.emit('results', { results: queryPath[3], query: query });
+                
+            }
+            else {
+                console.log("Error connecting to server : " + JSON.stringify(response));
+            }
+            //raw for each device check accuracy flag and put it in deviceib device cmx etc
+        });
+
+    });
+
 });
 
+updated = [];
 app.post('/', function (req, res) {
 
     var body = "";
@@ -369,32 +479,84 @@ app.post('/', function (req, res) {
             var parsedJSON = JSON.parse(decodedText);
             var output = JSON.stringify(parsedJSON.output);
 
-            console.log("----------------------STATUS UPDATE : DEVICE MOVED------------------- \n" + str2);
+            console.log("----------------------STATUS UPDATE : DEVICE MOVED------------------- \n" + output);
 
-            //Creating log file to record values
-            //var wstream = fs.createWriteStream('log.txt');
+            var updateUrl = "http://" + IP + ":" + karafPORT + "/InCSE1/LocationAE/Things" + urlParameters + "&resultContent=6";
 
-            var path = "http://52.10.62.166:8282/InCSE1/";
-            var url = "http://52.10.62.166:8282/InCSE1/LocationAE/Things?resultContent=10&from=http:52.10.62.166:10000&requestIdentifier=12345&Content-Type=application/json&Accept=application/json&Authorization=Basic YWRtaW46YWRtaW4=";
+            //grab source container
+            //SUNDAY : change to source attribute
+            var source = JSON.stringify(data.output.ResourceOutput[0].Attributes[5]["attributeValue"]);
+            var path = "http://" + IP + ":" + karafPORT + "/" + relPath + "/AccuracyFlag" + urlParameters;
+            
+            //if source is things, i.e. device container is created and new device is added
+            if (source == "InCSE1/LocationAE/Things")
+            {
+                requestAccFlag(source, path,1);
+                
+            }
+            //else location changed from source conatainer
+            else
+            {
+                requestAccFlag(source,path,2)
+            }
 
-            //check ONE: for device movement
-
-            //if(Notification source is Things)
-
-
+           // sendUpdate();
             //check TWO: for device being added
-
-
         }
         res.end();
     });
 });
+
+
  /*
-    function sendData(){
-        io.sockets.emit('rssi', {rssival:12});
-    }
-    function sendTime() {
+    function sendTimestamp() {
         io.sockets.emit('time', { time: new Date().toJSON() + '\n -------Device Added with Name : ' + dev + '\n With Latitude' + dev3 + '\n and Longitudee' + dev4 });
     }
-    setInterval(sendTime, 10000000);
+    setInterval(sendTimestamp, 10000000);
+
+*/
+
+/*
+//source from where update arrived
+var updateUrl = "http://" + IP + ":" + karafPORT + "/InCSE1/LocationAE/Things" + urlParameters + "&resultContent=5";
+
+request({
+    url: updateUrl,
+    json: true,
+    Authorization: "Basic YWRtaW46YWRtaW4="
+}, function (error, response, data) {
+
+    //if(data.length){
+    console.log("GEETING DATA FROM:-" + GetAllUrl);
+    console.log(JSON.stringify(data));
+
+    //find the parent container of update notificaition/source
+    devicePaths = JSON.stringify(data.output.ResourceOutput[0].Attributes[8]["attributeValue"]);
+    console.log(devicePaths);
+
+    //removing quotes from attributeValue
+    var withoutQuotes = devicePaths.substring(1, devicePaths.length - 2);
+
+    //splitting each path by comma
+    devicePaths = withoutQuotes.split(",");
+
+
+    for (i = 0; i < devicePaths.length; i++) {
+
+        //removing the array brackets & spaces(first characters)
+        devicePaths[i] = devicePaths[i].substring(1);
+
+        console.log("\n URL GRABBED for Device " + i + " : " + devicePaths[i]);
+
+        var relPath = devicePaths[i];
+        console.log(relPath);
+        var eachPath = "http://" + IP + ":" + karafPORT + "/" + relPath + "/AccuracyFlag" + urlParameters;
+        requestAccFlag(relPath, eachPath);
+       
+
+
+        }
+    }
+    
+});
 */

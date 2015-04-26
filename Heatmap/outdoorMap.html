@@ -5,8 +5,12 @@
     <title>
          Heatmap
     </title>
-<!--<link rel="stylesheet" type="text/css" href="C:\\Users\user\Desktop\HEATMAP\style1.css"/>-->
-      <style>@import url(http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css);
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+    <style type="text/css">
+@import url(http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css);
 @import url(http://fonts.googleapis.com/css?family=Titillium+Web:300);
 html, body, #map-canvas {
     height: 88%;
@@ -17,14 +21,14 @@ html, body, #map-canvas {
 }
 
 #panel {
-    position: absolute;
+    position: fixed;
     top: 87px;
-    left: 77.5%;
+    left: 77%;
           margin-left: -150px;
           z-index: 5;
-          background-color: #fff;
-          padding: 5px;
-          border: 1px solid #999;
+          background-color:none;
+          padding: 3px;
+          border: none;
 }
 
 .fa-2x {
@@ -197,221 +201,274 @@ height: 100%;
 
 }</style>
       
-<script src="C://Users/user/Desktop/HEATMAP/indoorMap.html"></script>
-<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
-<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=visualization"></script>
-<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
-<!--Edit PORT# to what your server is listening at-->
-<script src='//localhost:8119/socket.io/socket.io.js'></script>
+    <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=visualization"></script>
 
-<!--
-    SOCKET for COMMUNICATION between view pages and back end NodeJS Server
--->
+    <!--Edit PORT# to what your server is listening at-->
+    <script src='//localhost:8119/socket.io/socket.io.js'></script>
 
-<script>
-    var PORT = 8119;  //Same as PORT# in heatmap.js
-    var socket = io.connect('//localhost:' + PORT);
+    <!--
+        SOCKET for COMMUNICATION between view pages and back end NodeJS Server
+    -->
+     
+    <script type="text/javascript">
 
-    socket.on('welcome', function (data) {
+        var PORT = 8119;  //Same as PORT# in heatmap.js
+        var socket = io.connect('//localhost:' + PORT);
 
-        $('#messages').append('<li>' + data.message + '</li>');
-        socket.emit('client', { data: 'Page Refreshed' });
+        socket.on('welcome', function (data) {
 
-    });
+            $('#messages').before('<br/><br/>-'+data.message+'-<hr/>');
+            socket.emit('client', { data: 'Page Refreshed' });
+            //a handshake signal is sent back so as to keep track of connections and operations on serverside via console
 
-    socket.on('allDevices', function (data) {
-        $('#messages').append('<li>' + 'Devices Added!' + '</li>');
-
-        for (var key in allDevices) {
-            $('#messages').append('<li>' + '\n' + (allDevices[key]) + '</li>');
-        }
-        socket.emit('handshake', { data: 'Operation successfull' });
-        $('#messages').append('<li>' + data.message + '</li>');
-
-    });
-    socket.on('update', function (data) {
-        console.log(data);
-        $('#messages').append('<li>' + data.time + ' \n' + data.msg + '\n  New Device Update Recieved! ' + '</li>');
-    });
-    /*
-     socket.on('rssi', function (data) {
-        
-        $('#messages').append('<li>' + data.time + '\n  New Device Update! ' + '</li>');
-        $('#mapgrid1').append('<li><i class="fa fa-mobile-phone fa-2x"></i><span class="nav-text"><li>' + '' + '</span></li>');
-
-        for(i=0;i<data.rssival.length;i++){
-            
-            //RSSI->Distance
-            //if it is in 1
-            //calculate only if it is in beacons range
-            if (x1 < -2 && x1 > -1) {
-
-            }
-            $('#mapgrid1').append('<li>' + data.rssival + '</li>');
-            //if it is in 2
-            //$('#mapgrid1').append('<li>' + data.rssival + d[i] + '</li>');
-            //and so on
-        }
-    });
-    /*
-    function rssiTODistance(rssiv) {
-        var dist = 0,n=4.2119;
-        if (rssiv == 0) {
-            return -1.0; 
-        }
-        n = 4;
-        dist = 10^(A/(10*n)-rssiv/(10*n));
-        var e = rssiv*1.0/txP;
-        if (e < 1.0) {
-            dist= Math.pow(e,10);
-        }
-        else {
-            dist =  (0.89976)*Math.pow(e,7.7095) + 0.111;    
-        }
-        return dist;
-    }
-    */
-    socket.on('error', function () { console.error(arguments) });
-
-    function showLocationHistory() {
-        //append instead
-        infoPane.textContent = "Location  \n history \n A-> \n B-> \n C-> \n D";
-    }
-
-    function showDeviceInformation() {
-        //append instead
-        ///add device information
-        infoPane.textContent = "Device Information:\t\t\t" + "\t" + "Device type iPhone" + "\t" + "Current Location:\t23`,46`";
-
-    }
-
-    function showSearchResults() {
-
-        infoPane.textContent = "Device A \t Device B";
-    }
-</script>
-<script type="text/javascript">
-    var jsonarray = '{"lat":"42.352081","long":"-71.106773","lat2":"42.348901","long2":"-72.101880","lat3":"42.349472","long3":"-71.104691","lat4":"42.350804","long4":"-71.108210","lat5":"42.349726","long5":"-71.106472","lat6":"42.350059","long6":"-71.099820","lat7":"42.349313","long7":"-71.110485","lat8":"42.349155","long8":"-71.102567","lat9":"42.351946","long9":"-71.116858","lat10":"42.349472","long10":"-71.095593","lat11":"42.350138","long11":"-71.099069"}';
-    var getLocation = JSON.parse(jsonarray);
+        });
     
-    var mapData = [
-      new google.maps.LatLng(getLocation.lat, getLocation.long),
-      new google.maps.LatLng(getLocation.lat2, getLocation.long2),
-      new google.maps.LatLng(getLocation.lat3, getLocation.long3),
-      new google.maps.LatLng(getLocation.lat4, getLocation.long4),
-      new google.maps.LatLng(getLocation.lat5, getLocation.long5),
-      new google.maps.LatLng(getLocation.lat6, getLocation.long6),
-      new google.maps.LatLng(getLocation.lat7, getLocation.long7),
-      new google.maps.LatLng(getLocation.lat8, getLocation.long8),
-      new google.maps.LatLng(getLocation.lat9, getLocation.long9),
-      new google.maps.LatLng(getLocation.lat10, getLocation.long10),
-      new google.maps.LatLng(getLocation.lat11, getLocation.long11),
-    ];
+        //on getting all devices when the view is accessed
+        allDevices = [];
+        socket.on('allDevices', function (data) {
+            $('#messages').before('<br/>'+'----- | Currently Monitored Devices: | -----');
 
-    var map, pointarray, heatmap;
+            allDevices = data.devices;
+            console.log(data.devices);
+            for (var key in data.devices) {
+
+                console.log('Got All devices!');
+
+                //list all devices by adding them to infoPane's messages div
+                $('#messages').prepend('<br/><div id="dev' + key + '"><i class="fa fa-mobile-phone fa-2x"></i><span class="nav-text" onclick="showHideInfo(' + key + ')"><b>' + (data.devices[key][0]) + '</b></span></div>');
+               
+                $('#dev'+key).after('<div id="' + key + '" style="display:none"><br/><b>' + '\n Device Name       : </b>' + (data.devices[key][0]) +
+                    '\n<b><br/> Location         : </b>' + (data.devices[key][1]) + ' , ' + (data.devices[key][2]) +
+                    '\n<b><br/> Last Updated on   : </b>' + (data.devices[key][3]) +
+                    '\n<b><br/> Indoor or Outdoor : </b>' + (data.devices[key][4]) + '</div><hr/>');
+                
+                plot(data.devices);
+               
+            }
+            
+        });
+
+        //getting updated devices/locations
+        allUpdatedDev = [];
+        socket.on('updatedDev', function (data) {
+            allUpdatedDev = data.updatedDev;
+            //save it to allUpdatedDev;
+            for (var key in data.updatedDev ) {
+
+                $('#messages').append('<br/><div id="dev' + key + '"><i class="fa fa-mobile-phone fa-2x"></i><span class="nav-text" onclick="showHideInfo(' + key + ')"><b>' + (data.updatedDev[key][0]) + '</b></span></div>');
+
+                $('#dev' + key).after('<div id="' + key + '" style="display:none"><br/><b>' + '\n Device Name       : </b>' + (data.updatedDev[key][0]) +
+                    '\n<b><br/> Location         : </b>' + (data.updatedDev[key][1]) + ' , ' + (data.updatedDev[key][2]) +
+                    '\n<b><br/> Last Updated on   : </b>' + (data.updatedDev[key][3]) +
+                    '\n<b><br/> Indoor or Outdoor : </b>' + (data.updatedDev[key][4]) + '</div><hr/>');
+            }
+        });
+        
+        socket.on('results', function (data) {
+            console.log("GOT DATA" + data.results+data.query);
+            marker1 = null;
+            $('#messages').innerHTML = '<br/>' + '----- | Search Results: | -----';
+            said = 0;
+            if (data.results) {
+                for (var key in allDevices) {
+
+                    console.log(allDevices[key][0].indexOf(data.results));
+                    //if (allDevices[key][0].indexOf(data.results) != -1) {
+
+                    if (allDevices[key][0] == data.results) {
+                       // if (said == 0) {
+                            $('#messages').prepend('<br/><div id="dev' + key + '"><i class="fa fa-mobile-phone fa-2x"></i><span class="nav-text" onclick="showHideInfo(' + key + ')"><b>' + data.query + '</b></span></div>');
+
+                            $('#dev' + key).append('<div id="' + key + '" style="display:none"><br/><b>' + '\n Device UUID       : </b>' + (allDevices[key][0]) +
+                                '\n<b><br/> Location         : </b>' + (allDevices[key][1]) + ' , ' + (allDevices[key][2]) +
+                                '\n<b><br/> Last Updated on   : </b>' + (allDevices[key][3]) +
+                                '\n<b><br/> Indoor or Outdoor : </b>' + (allDevices[key][4]) + '</div><hr/>');
+                            isSelected(allDevices[key], data.query);
+                        }
+                   // } said++;
+                   // }
+                }
+            }
+            else {
+                if (told == 0) {
+
+                    $('#messages').prepend('<br/><div><span class="nav-text"><b>' + data.query + ' not found on the area!' + '</b></span></div>');
+                } told++;
+            }
+        });
+
+        socket.on('error', function () { console.error(arguments) });
+        
+        function showHideInfo(key) {
+            var showHide = this.document.getElementById(key);
+            if (showHide.style.display == 'block') {
+                showHide.style.display = 'none';
+            }
+            else {
+                showHide.style.display = 'block';
+            }
+        }
+
+        function showLocationHistory() {
+
+        }
+
+    toPlotIN = [];
+    toPlotOUT = [];
+
+    function plot(devices) {
+        for (var key in devices) {
+
+            if (devices[key][4] == "OUT") {
+
+                toPlotOUT.push(devices[key]);
+            }
+            else if ((devices[key][4] != "OUT")) {
+                if ((devices[key][4] == "INOUT")) {
+
+                    toPlotOUT.push(devices[key]);
+
+                    toPlotIN.push(devices[key]);
+                }
+                else if (devices[key][4] != "INOUT") {
+                    if ((devices[key][4] == "IN")) {
+                        
+                        toPlotIN.push(devices[key]);
+                    }
+                    else if ((devices[key][4] != "IN")) {
+                        //no devices to plot
+                    }
+                }
+            }
+        } mapIt(toPlotOUT);
+    }   
+    
+
+    var map, heatmap;
+    marker=[],History=[],Trail=[],i=0;
+    heatmapData = [];
+    function mapIt(toPlotOUT) {
+      //  toPlotOUT.push(["abc", 42.350429, -71.107094, 1234, "OUT"]);
+        //toPlotOUT.push(["abcd", 42.349287, -71.104820, 1234, "OUT"]);
+        console.log(toPlotOUT);
+        
+        for (var key in toPlotOUT) {
+            var coords0 = toPlotOUT[key][1];
+            var coords1 = toPlotOUT[key][2];
+            var device_name = toPlotOUT[key][0];
+            var latLng = new google.maps.LatLng(coords0, coords1);
+            heatmapData.push(latLng);
+            /*  
+                marker[i] = new google.maps.Marker({
+                    position: new google.maps.LatLng(coords0, coords1),
+                    map: map,
+                    title: device_name
+                });
+                
+                google.maps.event.addListener(marker[i], 'click', function () {
+                    map.setCenter(marker[i].getPosition());
+                });
+            */
+        }
+    };
+    marker1='';
+    selectedDevice = [];
+    function isSelected(selectedDevice, name) {
+
+        var coords0 = selectedDevice[1];
+        var coords1 = selectedDevice[2];
+        var device_name = selectedDevice[0];
+        console.log('Plotting marker for:' + selectedDevice[0] + selectedDevice[1])
+        marker1 = new google.maps.Marker({
+            position: new google.maps.LatLng(coords0, coords1),
+            map: map,
+            title: name
+        });
+
+        map.setCenter(marker1.getPosition());
+
+        google.maps.event.addListener(marker1, 'click', function () {
+            map.setCenter(marker1.getPosition());
+        });
+        
+    }
 
     function initialize() {
-        var photonicsMap;
-        var photonics = new google.maps.LatLng(42.349183, -71.105883);
-        var imageBounds = new google.maps.LatLngBounds(
-              new google.maps.LatLng(42.349343, -71.106559),
-              new google.maps.LatLng(42.348982, -71.105304));
-
         var mapOptions = {
-        zoom: 15,
-        center: new google.maps.LatLng(42.349145, -71.105874),
-        mapTypeId: google.maps.MapTypeId.ROADMAP
-    };
+            zoom: 13,
+            center: new google.maps.LatLng(42.348982, -71.105304),
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
 
-    map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+        map = new google.maps.Map(document.getElementById('map-canvas'),
+            mapOptions);
+            
+        heatmap = new google.maps.visualization.HeatmapLayer({
+            data: heatmapData,
+            map: map
+        });
+        /*
+        History = [
+              new google.maps.LatLng(37.772323, -122.214897),
+              new google.maps.LatLng(42.348982, -71.105304)
+        ];
 
-    photonicsMap = new google.maps.GroundOverlay('http://www.bu.edu/today/files/2014/07/h_iphone-header-shirts.jpg', imageBounds);
-    photonicsMap.setMap(map);
+        Trail = new google.maps.Polyline({
+            path: History,
+            geodesic: true,
+            strokeColor: '#FF0000',
+            strokeOpacity: 1.0,
+            strokeWeight: 2
+        });
 
-    google.maps.event.addListener(map, 'zoom_changed', function () {
+        Trail.setMap(map);
+        */
+        heatmap.setMap(map);
+    }
+    function toggleHeatmap() {
+        heatmap.setMap(heatmap.getMap() ? null : map);
+    }
+
+    function changeRadius() {
+        heatmap.set('radius', heatmap.get('radius') ? null : 20);
+    }
+    function showSearchResults(query) {
+        socket.emit('search', { query: query });
+    }
+
+        google.maps.event.addDomListener(window, 'load', initialize);
+    
+    
+
+  /*
+google.maps.event.addListener(map, 'zoom_changed', function () {
         zoomLevel = map.getZoom();
         if (zoomLevel >= 21) {
-            window.location.href = 'indoorMap.html';
-            
+            window.location.href = 'C://Users/user/Desktop/HEATMAP/indoorMap.html';
         }
     });
-
-    var pointArray = new google.maps.MVCArray(mapData);
-
-   //var marker, i;
-   //    for (i = 0; i < getLocations.length; i++) {  
-   //      marker = new google.maps.Marker({
-   //        position: new google.maps.LatLng(getLocations.lat[i], locations[i]),
-   //      map: map
-   //});
-
-    var marker = new google.maps.Marker({
-        position: new google.maps.LatLng(getLocation.lat6, getLocation.long6),
-        map: map,
-        title: 'W\'s iPhone'
-    });
-    var marker2 = new google.maps.Marker({
-        position: new google.maps.LatLng(getLocation.lat10, getLocation.long10),
-        map: map,
-        title: 'Z\'s iPad'
-    });
-    var marker3 = new google.maps.Marker({
-        position: new google.maps.LatLng(getLocation.lat11, getLocation.long11),
-        map: map,
-        title: 'X\'s iPad'
-    });
-    var marker4 = new google.maps.Marker({
-        position: new google.maps.LatLng(getLocation.lat9, getLocation.long9),
-        map: map,
-        title: 'Y\'s iPad'
-    });
-    var HistoryX = [
-        new google.maps.LatLng(getLocation.lat10, getLocation.long10),
-        new google.maps.LatLng(getLocation.lat11, getLocation.long11),
-        new google.maps.LatLng(getLocation.lat9, getLocation.long9)
-    ];
-
-    var Trail = new google.maps.Polyline({
-        path: HistoryX,
-        strokeColor: '#FFFFFF',
-        strokeOpacity: 1.0,
-        strokeWeight: 8
-    });
-    heatmap = new google.maps.visualization.HeatmapLayer({
-        data: pointArray
-    });
-    heatmap.setMap(map);
-}
     
-function toggleHeatmap() {
-    heatmap.setMap(heatmap.getMap() ? null : map);
-}
-
-function changeRadius() {
-    heatmap.set('radius', heatmap.get('radius') ? null : 20);
-}
-
-google.maps.event.addDomListener(window, 'load', initialize);
-
+*/
 </script>
 </head>
 
 <body class="bdy">
     
-<form action="#" class="searchb">  
-       <input type="text" name="q" placeholder="Looking For Someone?" id="sf"/>
-         <a href="#" style="text-underline-position:auto;" onclick="showSearchResults();">
+<div class="searchb">  
+       <input type="text" name="searchBox" placeholder="Looking For Someone?" id="searchBox" onchange="showSearchResults(document.getElementById('searchBox').value);"/>
+         <a href="#" style="text-underline-position:auto;" onclick="showSearchResults(document.getElementById('searchBox').value);">
             <i class="fa fa-search" style = "position: relative; display: inline-block; left: -10px; top: 6px;"></i>
          </a>
-</form>
+</div>
 
     <nav class="main-menu">
             <ul>
                 <li>
-                    <a href="#" onclick="showDeviceInformation();">
+                    <a href="#" onclick="window.location.reload()">
                         <i class="fa fa-mobile-phone fa-2x"></i>
                         <span class="nav-text">
-                            Device Information
+                            All Devices
                         </span>
                     </a>
                   
@@ -439,46 +496,15 @@ google.maps.event.addDomListener(window, 'load', initialize);
 
 <div id="map-container" style="height: 565px; width: 968px; margin-left: 68px; margin-top: 10px;">
 <div id="panel">
-  <button onclick="toggleHeatmap()">ON/OFF</button>
-  <button onclick="changeRadius()">Expand/Shrink</button>
+  <button onclick="toggleHeatmap()" class="btn btn-danger btn-sm" data-toggle="button">ON/OFF</button>
+  <button onclick="changeRadius()"  class="btn btn-danger btn-sm" data-toggle="button">Expand/Shrink</button>
 </div>
 <div id="map-canvas">
 </div>
-
     <div id='infoPane' class='infoPane' style="width: 18.5% ;right: 0; top: 0; height: 100%; overflow-y: auto;">
        <h2 align = "center"><u> Information Pane </u> </h2>
         <ul id='messages'></ul>
-                       <center>
-					   <i class="fa fa-mobile-phone fa-2x"></i>
-                        <span class="nav-text">
-                             Device A 
-                        </span>
-				 <hr/>
-                    <i class="fa fa-mobile-phone fa-2x"></i>
-                        <span class="nav-text">
-                            Device B
-                        </span>
-				<hr/>
-                        <i class="fa fa-mobile-phone fa-2x"></i>
-                        <span class="nav-text">
-                            Device C
-                         </span>
-						 
-				<hr/>
-                        <i class="fa fa-mobile-phone fa-2x"></i>
-                        <span class="nav-text">
-                            Device D
-                         </span>
-						 
-				<hr/>
-                        <i class="fa fa-mobile-phone"></i>
-                        <span class="nav-text">
-                            Device E
-                         </span>
-						</center>
     </div>
-
 </div>
-
 </body>
 </html>
