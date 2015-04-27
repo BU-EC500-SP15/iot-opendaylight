@@ -423,8 +423,8 @@ io.sockets.on('connection', function (socket) {
         }, function (error, response, data) {
 
             console.log("GEETING DATA FROM:-" + queryUrl);
-
-            if (data) {
+            
+            if (JSON.stringify(data.output)) {
 
                 //debug: remove HERE
                 console.log(JSON.stringify(data));
@@ -445,7 +445,11 @@ io.sockets.on('connection', function (socket) {
                 
             }
             else {
-                console.log("Error connecting to server : " + JSON.stringify(response));
+
+                console.log("Error connecting to server : " + JSON.stringify(data));
+
+                io.sockets.emit('results', { results: 0, query: query });
+                //pass zero to indicate search returned no results
             }
             //raw for each device check accuracy flag and put it in deviceib device cmx etc
         });

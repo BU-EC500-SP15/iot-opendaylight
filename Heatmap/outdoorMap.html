@@ -269,15 +269,15 @@ height: 100%;
             console.log("GOT DATA" + data.results+data.query);
             marker1 = null;
             $('#messages').innerHTML = '<br/>' + '----- | Search Results: | -----';
-            said = 0;
-            if (data.results) {
+            told=0;
+            if (data.results != 0) {
+                console.log(data.results);
                 for (var key in allDevices) {
 
                     console.log(allDevices[key][0].indexOf(data.results));
                     //if (allDevices[key][0].indexOf(data.results) != -1) {
 
                     if (allDevices[key][0] == data.results) {
-                       // if (said == 0) {
                             $('#messages').prepend('<br/><div id="dev' + key + '"><i class="fa fa-mobile-phone fa-2x"></i><span class="nav-text" onclick="showHideInfo(' + key + ')"><b>' + data.query + '</b></span></div>');
 
                             $('#dev' + key).append('<div id="' + key + '" style="display:none"><br/><b>' + '\n Device UUID       : </b>' + (allDevices[key][0]) +
@@ -286,8 +286,6 @@ height: 100%;
                                 '\n<b><br/> Indoor or Outdoor : </b>' + (allDevices[key][4]) + '</div><hr/>');
                             isSelected(allDevices[key], data.query);
                         }
-                   // } said++;
-                   // }
                 }
             }
             else {
@@ -312,7 +310,26 @@ height: 100%;
 
         function showLocationHistory() {
 
+            toPlotOUT.push(["XX", [42.349227, 42.349133], [-71.106513, -71.105872], 4, "OUT"]);
+            $('#messages').innerHTML = "";
+           
+            $('#messages').prepend( "<select id=\"locDev\" onclick=\"locDevSelectedIndexChanged();\"><option disabled selected>Select a Device</option></select>");
+            console.log("dropdowncreated");
+            for (var key in toPlotOUT) {
+                $('#locDev').append('<option value=' + toPlotOUT[key][0] + '>' + toPlotOUT[key][0] + '</option>');
+                
+            }
+
         }
+        function locDevSelectedIndexChanged() {
+            var e = document.getElementById("locDev");
+            var selectedDev = e.options[e.selectedIndex].value;
+
+            console.log(selectedDev);
+             PlothistoryOf(selectedDev);
+            
+        }
+        
 
     toPlotIN = [];
     toPlotOUT = [];
@@ -346,7 +363,8 @@ height: 100%;
     
 
     var map, heatmap;
-    marker=[],History=[],Trail=[],i=0;
+    marker = [], History = [], Trail = [], i = 0;
+    
     heatmapData = [];
     function mapIt(toPlotOUT) {
       //  toPlotOUT.push(["abc", 42.350429, -71.107094, 1234, "OUT"]);
@@ -354,6 +372,7 @@ height: 100%;
         console.log(toPlotOUT);
         
         for (var key in toPlotOUT) {
+            
             var coords0 = toPlotOUT[key][1];
             var coords1 = toPlotOUT[key][2];
             var device_name = toPlotOUT[key][0];
@@ -375,7 +394,7 @@ height: 100%;
     marker1='';
     selectedDevice = [];
     function isSelected(selectedDevice, name) {
-
+        
         var coords0 = selectedDevice[1];
         var coords1 = selectedDevice[2];
         var device_name = selectedDevice[0];
@@ -396,7 +415,7 @@ height: 100%;
 
     function initialize() {
         var mapOptions = {
-            zoom: 13,
+            zoom: 19,
             center: new google.maps.LatLng(42.348982, -71.105304),
             mapTypeId: google.maps.MapTypeId.ROADMAP
         };
@@ -409,23 +428,51 @@ height: 100%;
             map: map
         });
         /*
-        History = [
-              new google.maps.LatLng(37.772323, -122.214897),
-              new google.maps.LatLng(42.348982, -71.105304)
-        ];
-
-        Trail = new google.maps.Polyline({
-            path: History,
-            geodesic: true,
-            strokeColor: '#FF0000',
-            strokeOpacity: 1.0,
-            strokeWeight: 2
-        });
-
-        Trail.setMap(map);
         */
         heatmap.setMap(map);
     }
+
+    function PlothistoryOf(deviceS) {
+        dev = [];
+        
+        var showHide = this.document.getElementById(key);
+                
+            for (var key in toPlotOUT) {
+                if (toPlotOUT[key][0] == deviceS) {
+                    dev[0] = toPlotOUT[key];
+                    console.log(toPlotOUT[key]);
+                }
+            }
+
+            console.log(dev[0][0] + " "+deviceS);
+            coordU0 = [], coordU1 = [];
+            for (var key in dev[0][1]) {
+                coordU0[key] = dev[0][1][key];
+                console.log(dev[0][1][key]);
+            }
+            for (var key in dev[0][2]) {
+                coordU1[key] = dev[0][2][key];
+                console.log(dev[0][2][key]);
+            }
+            
+            for(var key in coordU0)
+            {
+                console.log(coordU0[key], coordU1[key]);
+                var latLng = new google.maps.LatLng(coordU0[key], coordU1[key]);
+                History.push(latLng);
+            }
+            
+            Trail[key] = new google.maps.Polyline({
+            path: History,
+            geodesic: true,
+            strokeColor: '#05c9a0',
+            strokeOpacity: 1.0,
+            strokeWeight: 2
+            });
+            Trail[key].setMap(map);
+            
+    }
+       
     function toggleHeatmap() {
         heatmap.setMap(heatmap.getMap() ? null : map);
     }
@@ -437,10 +484,8 @@ height: 100%;
         socket.emit('search', { query: query });
     }
 
-        google.maps.event.addDomListener(window, 'load', initialize);
+    google.maps.event.addDomListener(window, 'load', initialize);
     
-    
-
   /*
 google.maps.event.addListener(map, 'zoom_changed', function () {
         zoomLevel = map.getZoom();
@@ -484,7 +529,7 @@ google.maps.event.addListener(map, 'zoom_changed', function () {
                 </li></ul>
             <ul class="back">
                 <li>
-                   <a href="outdoorMap.html">
+                   <a href="#" onclick="window.location.reload()">
                         <i class="fa fa-map-marker fa-2x"></i>
                         <span class="nav-text">
                         Back to Maps?
