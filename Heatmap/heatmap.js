@@ -19,7 +19,7 @@ var app     =   require('express')();
 var http    =   require('http').Server(app);
 var io      =   require('socket.io')(http);
 
-var PORT = 8119;         //nodejs listens @ PORT#
+var PORT = 11111;         //nodejs listens @ PORT#
 
 //devices array of objects has each object as : {device_UUID,acc_flag,x,y,creationTime,IN/OUT}
 //each object is an array in itself

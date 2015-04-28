@@ -205,7 +205,7 @@ height: 100%;
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=visualization"></script>
 
     <!--Edit PORT# to what your server is listening at-->
-    <script src='//localhost:8119/socket.io/socket.io.js'></script>
+    <script src='//localhost:11111/socket.io/socket.io.js'></script>
 
     <!--
         SOCKET for COMMUNICATION between view pages and back end NodeJS Server
@@ -213,7 +213,7 @@ height: 100%;
      
     <script type="text/javascript">
 
-        var PORT = 8119;  //Same as PORT# in heatmap.js
+        var PORT = 11111;  //Same as PORT# in heatmap.js
         var socket = io.connect('//localhost:' + PORT);
 
         socket.on('welcome', function (data) {
